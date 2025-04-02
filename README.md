@@ -33,11 +33,6 @@ Lancez le serveur en mode développement avec nodemon :
 npm run dev
 ```
 
-Ou en mode production :
-```sh
-npm start
-```
-
 ### 6. Accéder à l'API
 Ouvrez votre navigateur et accédez à l'URL suivante pour voir la documentation Swagger :
 ```
