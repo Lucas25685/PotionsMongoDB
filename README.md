@@ -1,3 +1,49 @@
+## Démarrer le projet
+
+### 1. Cloner le dépôt
+Clonez le dépôt sur votre machine locale :
+```sh
+git clone <URL_DU_DEPOT>
+cd MongoDB
+```
+
+### 2. Installer les dépendances
+Installez les dépendances nécessaires avec npm :
+```sh
+npm install
+```
+
+### 3. Configurer les variables d'environnement
+Créez un fichier `.env` à la racine du projet et ajoutez les variables suivantes :
+```env
+PORT=3000
+MONGO_URI=mongodb://localhost:27017/esgi
+JWT_SECRET=your_jwt_secret
+```
+
+### 4. Lancer MongoDB
+Assurez-vous que MongoDB est en cours d'exécution sur votre machine. Si ce n'est pas le cas, démarrez MongoDB :
+```sh
+mongod
+```
+
+### 5. Démarrer le serveur
+Lancez le serveur en mode développement avec nodemon :
+```sh
+npm run dev
+```
+
+Ou en mode production :
+```sh
+npm start
+```
+
+### 6. Accéder à l'API
+Ouvrez votre navigateur et accédez à l'URL suivante pour voir la documentation Swagger :
+```
+http://localhost:3000/api-docs
+```
+
 # nodeJS et mongoDB
 Cours de nodeJS et mongoDB, par Nicolas Hersant - Galactic Robots, pour ESGI.
 
