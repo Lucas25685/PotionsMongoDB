@@ -335,4 +335,146 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
+// GET /potions/:id : Récupérer une potion par ID
+/**
+ * @swagger
+ * /potions/{id}:
+ *   get:
+ *     summary: Récupère une potion par son ID.
+ *     tags:
+ *       - Potions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la potion.
+ *     responses:
+ *       200:
+ *         description: Potion récupérée avec succès.
+ *       404:
+ *         description: Potion non trouvée.
+ *       500:
+ *         description: Erreur serveur.
+ */
+router.get('/:id', async (req, res) => {
+    try {
+        const potion = await Potion.findById(req.params.id);
+        if (!potion) {
+            return res.status(404).json({ error: 'Potion non trouvée.' });
+        }
+        res.json(potion);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT /potions/:id : Modifier une potion par ID
+/**
+ * @swagger
+ * /potions/{id}:
+ *   put:
+ *     summary: Modifie une potion par son ID.
+ *     tags:
+ *       - Potions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la potion.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nom de la potion.
+ *               price:
+ *                 type: number
+ *                 description: Prix de la potion.
+ *               score:
+ *                 type: number
+ *                 description: Score de la potion.
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Ingrédients de la potion.
+ *               ratings:
+ *                 type: object
+ *                 properties:
+ *                   strength:
+ *                     type: number
+ *                   flavor:
+ *                     type: number
+ *               tryDate:
+ *                 type: string
+ *                 format: date
+ *               categories:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               vendor_id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Potion modifiée avec succès.
+ *       404:
+ *         description: Potion non trouvée.
+ *       500:
+ *         description: Erreur serveur.
+ */
+router.put('/:id', authMiddleware, async (req, res) => {
+    try {
+        const updatedPotion = await Potion.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!updatedPotion) {
+            return res.status(404).json({ error: 'Potion non trouvée.' });
+        }
+        res.json(updatedPotion);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// DELETE /potions/:id : Supprimer une potion par ID
+/**
+ * @swagger
+ * /potions/{id}:
+ *   delete:
+ *     summary: Supprime une potion par son ID.
+ *     tags:
+ *       - Potions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la potion.
+ *     responses:
+ *       200:
+ *         description: Potion supprimée avec succès.
+ *       404:
+ *         description: Potion non trouvée.
+ *       500:
+ *         description: Erreur serveur.
+ */
+router.delete('/:id', authMiddleware, async (req, res) => {
+    try {
+        const deletedPotion = await Potion.findByIdAndDelete(req.params.id);
+        if (!deletedPotion) {
+            return res.status(404).json({ error: 'Potion non trouvée.' });
+        }
+        res.json({ message: 'Potion supprimée avec succès.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

@@ -10,6 +10,7 @@ Cours de nodeJS et mongoDB, par Nicolas Hersant - Galactic Robots, pour ESGI.
 ```sh
 npm init
 npm install -g nodemon
+npm install express
 ```
 
 ## créer server.js
@@ -136,13 +137,14 @@ Update
 db.potions.find()
 db.potions.find().count()
 db.potions.updateOne({"name": "Invisibility"}, { $set: { "color": "bleu", "price": 10.99, "score": 59, "count": 1 }})
-db.potions.updateMany({}, { $set: { "ingredients": [] }})
+db.potions.updateMany({}, { $set: { "ingredients": [] }}).
 db.potions.updateOne({"name": "Invisibility"}, { $set: { "tryDate": new Date(2025,4,1) }})
 db.potions.updateMany({"name": "Invisibility"}, { $set: { "tryDate": new Date() }})
 db.potions.updateOne({"name": "Invisibility"}, { $set: { "ingredients": ["newt toes", 42, "laughter"], "category": ["tasty", "effective"] }})
 db.potions.updateOne({"name": "Invisibility"}, { $set: { "ratings": {"strength": 2, "flavor": 5} }})
 db.potions.updateOne({"name": "Invisibility"}, { $set: { "ratings.strength": 1 } })
 db.potions.updateOne({"name": "Invisibility"}, { $inc: { "count": 1 }})
+db.potions.updateOne({"name": "Love"}, { $set: { "ratings": {"strength": 2, "flavor": 5}, "ingredients": ["hair","water"], "category": ["tasty", "slow", "temporary"], "tryDate": new Date()}})
 ```
 Read valeurs imbriquées :  
 mongo peut rechercher directement une valeur dans un tableau ou rechercher dans les objets imbriqués via l'opérateur .
@@ -158,6 +160,9 @@ db.potions.deleteMany({"ratings.flavor":5})
 exercice :  
 Implémentez votre base avec des données homogènes pour chaque potions, inventez les données manquantes.
 (tryDate, ingredients, color, ratings, vendor, count)
+```js
+db.potions.updateMany({}, { $set: { "ingredients": [], "tryDate": new Date(2025,4,1),  }}).
+```
 
 ## mongoDB : manipulations courantes 
 
@@ -227,7 +232,7 @@ db.potions.find().sort({"price": -1}).skip(1).limit(2)
 
 Modifions la base pour transformer le champ vendeurs en objet afin d'enregistrer les coordonnées du vendeur 
 ```js
-db.potions.updateMany({"vendor.name": "Kettlecooked"}, {$set: {"vendor_id" : "Kettlecooked"}})
+db.potions.updateMany({"vendor.name": "Kettlecooked"}, {$set: {"vendor_id" : "Kettlecooked"}}})
 db.potions.updateMany({"vendor": "Brewers"}, {$set: {"vendor" : {"name": "Brewers", "organic": false}}})
 db.potions.find()
 db.potions.updateOne({"name": "Invisibility"}, {$set: {"vendor" : {"name": "Kettlecooked", "organic":  false}}})
@@ -318,7 +323,7 @@ db.potions.aggregate([{$group: {"_id": "$vendor_id", "max_price": {$max: "$price
 requête optimisée avec filtre 
 ```js
 db.potions.aggregate([
-   { $match: {"score": {$gte:50} }}, 
+   { $match: {"score": {$gte:5, $lte: 70} }}, 
    { $project: {"_id": false, "vendor_id": true, "score": true}},
    { $group: {"_id": "$vendor_id", "count": {$sum: 1}, "avg_score": {$avg: "$score"}}},
    { $sort: {"avg_score": -1}},
@@ -339,7 +344,7 @@ db.movies.aggregate([
 
 ## Avec expressJS
 ```sh
-npm i express dotenv cors mongodb
+npm i express dotenv cors mongodb mongoose
 ```
 ### variables d'environnement
 créer un fichier .env (non versionné) contenant les informations de connection
@@ -389,12 +394,14 @@ const Potion = require('./potion.model');
 ```
 les routes peuvent être écrites en dur
 ```javascript
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.send('root')
 })
-app.get('/about', (req, res) => {
+router.get('/about', (req, res) => {
   res.send('about')
 })
+
+module.exports = router;
 ```
 leur lecture est synchrone, si une requête destinée à une route est compatible avec une route précédente, elle sera catchée par la première dans l'ordre du fichier.
 les routes peuvent également être écrites avec des expressions régulières
@@ -596,6 +603,7 @@ avec les imports & constantes
 ```js
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 const User = require('./user.model');
 
 const router = express.Router();
@@ -681,15 +689,35 @@ On va mettre en place swagger pour avoir une interface visuelle permettant d'inf
 npm install swagger-ui-express swagger-jsdoc
 ```
 
+Mettre en place swagger en vous basant sur sa documentation officielle
 
+exemple :
 ```js
+/**
+ * @swagger
+ * /potions:
+ *   get:
+ *     summary: Récupérer toutes les potions
+ *     responses:
+ *       200:
+ *         description: Liste des potions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+router.get('/', async (req, res) => {
+    try {
+        const potions = await Potion.find();
+        res.json(potions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 ```
 
+Vous devez maintenant mettre en place un CRUD classique sur les potions, ainsi qu'une route permettant de récupérer une seule potion via son ID. (utilisez la fonction findById())
 
-
-
-```sh
-```
-
-```js
-```
+Ajouter le swagger sur toutes vos routes afin que votre API puisse être testée via son swagger (travail noté correspondant à au moins 50% de la note)
