@@ -115,8 +115,6 @@ router.post('/login', async (req, res) => {
       secure: false,
       maxAge: 24 * 60 * 60 * 1000
     });
-
-    console.log('Token généré :', token);
   
     res.json({ message: 'Connecté avec succès' });
   });
